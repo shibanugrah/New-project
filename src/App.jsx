@@ -3,8 +3,10 @@ import { useEffect } from "react";
 
 import { products } from "./data/products";
 import ProductCard from "./components/ProductCard";
+import AuthModal from "./components/AuthModal";
 import CartDrawer from "./components/CartDrawer";
 import CheckoutModal from "./components/CheckoutModal";
+import OrderHistoryDrawer from "./components/OrderHistoryDrawer";
 import ProductDetail from "./components/ProductDetail";
 import ProductListing from "./components/ProductListing";
 import WishlistDrawer from "./components/WishlistDrawer";
@@ -12,6 +14,7 @@ import WishlistDrawer from "./components/WishlistDrawer";
 import {
   Heart,
   Menu,
+  Package,
   Search,
   ShoppingBag,
   Truck,
@@ -54,7 +57,16 @@ const styles = [
 ];
 
 
-function Header({ cartCount, onOpenCart, onOpenWishlist, wishlistCount }) {
+function Header({
+  cartCount,
+  currentUser,
+  onOpenAuth,
+  onOpenCart,
+  onOpenOrders,
+  onOpenWishlist,
+  orderCount,
+  wishlistCount,
+}) {
   return (
     <header className="sticky top-0 z-50 bg-white shadow-sm">
       <div className="bg-brand-dark px-4 py-2 text-center text-xs font-semibold uppercase tracking-wide text-white sm:text-sm">
@@ -98,7 +110,23 @@ function Header({ cartCount, onOpenCart, onOpenWishlist, wishlistCount }) {
               {wishlistCount}
             </span>
           </button>
-          <button className="rounded-full p-2 hover:bg-stone-100" aria-label="Account">
+          <button
+            className="relative rounded-full p-2 hover:bg-stone-100"
+            onClick={onOpenOrders}
+            aria-label="Open order history"
+          >
+            <Package size={22} />
+            <span className="absolute right-0 top-0 grid h-5 w-5 place-items-center rounded-full bg-brand-red text-xs font-bold text-white">
+              {orderCount}
+            </span>
+          </button>
+          <button
+            className={`rounded-full p-2 hover:bg-stone-100 ${
+              currentUser ? "text-brand-red" : "text-brand-ink"
+            }`}
+            onClick={onOpenAuth}
+            aria-label="Open account login"
+          >
             <User size={22} />
           </button>
           <button
@@ -294,6 +322,10 @@ function Footer() {
 
 export default function App() {
   const [selectedProduct, setSelectedProduct] = React.useState(products[0]);
+  const [currentUser, setCurrentUser] = React.useState(() => {
+    const saved = localStorage.getItem("currentUser");
+    return saved ? JSON.parse(saved) : null;
+  });
   
   const [cartItems, setCartItems] = React.useState(() => {
     const saved = localStorage.getItem("cartItems");
@@ -301,7 +333,9 @@ export default function App() {
   });
 
   const [isCartOpen, setIsCartOpen] = React.useState(false);
+  const [isAuthOpen, setIsAuthOpen] = React.useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = React.useState(false);
+  const [isOrderHistoryOpen, setIsOrderHistoryOpen] = React.useState(false);
   const [isWishlistOpen, setIsWishlistOpen] = React.useState(false);
   
   const [wishlistItems, setWishlistItems] = React.useState(() => {
@@ -315,6 +349,7 @@ export default function App() {
   });
 
   const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0);
+  const orderCount = orders.length;
   const wishlistCount = wishlistItems.length;
 
   function isProductWishlisted(productId) {
@@ -402,6 +437,14 @@ export default function App() {
     setCartItems([]);
   }
 
+  function handleLogin(user) {
+    setCurrentUser(user);
+  }
+
+  function handleLogout() {
+    setCurrentUser(null);
+  }
+
   useEffect(() => {
     localStorage.setItem("cartItems", JSON.stringify(cartItems));
   }, [cartItems]);
@@ -414,12 +457,24 @@ export default function App() {
     localStorage.setItem("orders", JSON.stringify(orders));
   }, [orders]);
 
+  useEffect(() => {
+    if (currentUser) {
+      localStorage.setItem("currentUser", JSON.stringify(currentUser));
+    } else {
+      localStorage.removeItem("currentUser");
+    }
+  }, [currentUser]);
+
   return (
     <div className="min-h-screen bg-white font-body text-brand-ink">
       <Header
         cartCount={cartCount}
+        currentUser={currentUser}
+        onOpenAuth={() => setIsAuthOpen(true)}
         onOpenCart={() => setIsCartOpen(true)}
+        onOpenOrders={() => setIsOrderHistoryOpen(true)}
         onOpenWishlist={() => setIsWishlistOpen(true)}
+        orderCount={orderCount}
         wishlistCount={wishlistCount}
       />
       <main>
@@ -448,6 +503,13 @@ export default function App() {
         <TrustBand />
       </main>
       <Footer />
+      <AuthModal
+        currentUser={currentUser}
+        isOpen={isAuthOpen}
+        onClose={() => setIsAuthOpen(false)}
+        onLogin={handleLogin}
+        onLogout={handleLogout}
+      />
       <CartDrawer
         cartItems={cartItems}
         isOpen={isCartOpen}
@@ -462,6 +524,11 @@ export default function App() {
         isOpen={isCheckoutOpen}
         onClose={() => setIsCheckoutOpen(false)}
         onPlaceOrder={handlePlaceOrder}
+      />
+      <OrderHistoryDrawer
+        isOpen={isOrderHistoryOpen}
+        onClose={() => setIsOrderHistoryOpen(false)}
+        orders={orders}
       />
       <WishlistDrawer
         wishlistItems={wishlistItems}

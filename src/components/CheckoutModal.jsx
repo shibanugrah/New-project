@@ -43,6 +43,7 @@ export default function CheckoutModal({
       id: newOrderId,
       customer: formData,
       items: cartItems,
+      placedAt: new Date().toISOString(),
       total,
       status: "Placed",
     });
