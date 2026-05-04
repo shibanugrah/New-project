@@ -1,9 +1,9 @@
 import React from "react";
 
-import { LockKeyhole, PackageCheck, Save, UserRound, X } from "lucide-react";
+import { LockKeyhole, LogOut, PackageCheck, Save, UserRound, X } from "lucide-react";
 import { getMyOrdersApi, getProfileApi, updateProfileApi } from "../services/api";
 
-export default function Profile({ currentUser, isOpen, onClose, onProfileUpdate }) {
+export default function Profile({ currentUser, isOpen, onClose, onLogout, onProfileUpdate }) {
   const [profile, setProfile] = React.useState(currentUser);
   const [orders, setOrders] = React.useState([]);
   const [formData, setFormData] = React.useState({
@@ -134,6 +134,15 @@ export default function Profile({ currentUser, isOpen, onClose, onProfileUpdate 
               </button>
               {message && <p className="rounded-md bg-stone-50 p-3 text-sm font-semibold text-stone-600">{message}</p>}
             </form>
+
+            <button
+              className="mt-4 flex w-full items-center justify-center gap-2 rounded-md border border-stone-200 px-5 py-3 font-bold text-brand-ink transition hover:border-brand-red hover:text-brand-red"
+              onClick={onLogout}
+              type="button"
+            >
+              Logout
+              <LogOut size={18} />
+            </button>
           </section>
 
           <section className="rounded-lg bg-white p-5 shadow-sm">

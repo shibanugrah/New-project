@@ -735,6 +735,7 @@ export default function App() {
         currentUser={currentUser}
         isOpen={isProfileOpen}
         onClose={() => setIsProfileOpen(false)}
+        onLogout={handleLogout}
         onProfileUpdate={handleProfileUpdate}
       />
       <CartDrawer
