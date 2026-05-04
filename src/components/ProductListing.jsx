@@ -41,7 +41,12 @@ function CheckFilter({ label, checked, onChange }) {
   );
 }
 
-export default function ProductListing({ onSelectProduct }) {
+export default function ProductListing({
+  isProductWishlisted,
+  onAddToCart,
+  onSelectProduct,
+  onToggleWishlist,
+}) {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedBrand, setSelectedBrand] = useState("All");
   const [selectedTypes, setSelectedTypes] = useState([]);
@@ -176,8 +181,11 @@ export default function ProductListing({ onSelectProduct }) {
               <div className="grid gap-x-8 gap-y-10 sm:grid-cols-2 xl:grid-cols-3">
                 {visibleProducts.map((product) => (
                   <ProductCard
+                    isWishlisted={isProductWishlisted(product.id)}
                     key={product.id}
                     product={product}
+                    onAddToCart={onAddToCart}
+                    onToggleWishlist={onToggleWishlist}
                     onViewProduct={onSelectProduct}
                   />
                 ))}

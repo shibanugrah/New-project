@@ -2,7 +2,13 @@ import React from "react";
 
 import { Heart, ShoppingBag } from "lucide-react";
 
-export default function ProductCard({ product, onViewProduct }) {
+export default function ProductCard({
+  isWishlisted,
+  product,
+  onAddToCart,
+  onToggleWishlist,
+  onViewProduct,
+}) {
   return (
     <article className="group bg-white">
       <div className="relative overflow-hidden rounded-lg bg-brand-soft">
@@ -10,10 +16,13 @@ export default function ProductCard({ product, onViewProduct }) {
           {product.discount}% OFF
         </span>
         <button
-          className="absolute right-3 top-3 z-10 rounded-full bg-white p-2 shadow-sm transition hover:text-brand-red"
-          aria-label={`Add ${product.name} to wishlist`}
+          onClick={() => onToggleWishlist?.(product)}
+          className={`absolute right-3 top-3 z-10 rounded-full bg-white p-2 shadow-sm transition hover:text-brand-red ${
+            isWishlisted ? "text-brand-red" : "text-brand-ink"
+          }`}
+          aria-label={`${isWishlisted ? "Remove" : "Add"} ${product.name} ${isWishlisted ? "from" : "to"} wishlist`}
         >
-          <Heart size={20} />
+          <Heart size={20} fill={isWishlisted ? "currentColor" : "none"} />
         </button>
         <button onClick={() => onViewProduct?.(product)} className="block w-full text-left">
           <img
@@ -37,7 +46,10 @@ export default function ProductCard({ product, onViewProduct }) {
           <span className="font-black text-brand-dark">Rs. {product.price}</span>
           <span className="text-sm text-stone-400 line-through">Rs. {product.oldPrice}</span>
         </div>
-        <button className="mt-4 flex w-full items-center justify-center gap-2 rounded-md border border-stone-300 px-4 py-2 text-sm font-bold text-brand-ink transition hover:border-brand-red hover:bg-brand-red hover:text-white">
+        <button
+          onClick={() => onAddToCart?.(product)}
+          className="mt-4 flex w-full items-center justify-center gap-2 rounded-md border border-stone-300 px-4 py-2 text-sm font-bold text-brand-ink transition hover:border-brand-red hover:bg-brand-red hover:text-white"
+        >
           Add to cart
           <ShoppingBag size={18} />
         </button>

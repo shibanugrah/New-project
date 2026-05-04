@@ -1,8 +1,13 @@
 import React from "react";
+import { useEffect } from "react";
+
 import { products } from "./data/products";
 import ProductCard from "./components/ProductCard";
+import CartDrawer from "./components/CartDrawer";
+import CheckoutModal from "./components/CheckoutModal";
 import ProductDetail from "./components/ProductDetail";
 import ProductListing from "./components/ProductListing";
+import WishlistDrawer from "./components/WishlistDrawer";
 
 import {
   Heart,
@@ -49,7 +54,7 @@ const styles = [
 ];
 
 
-function Header() {
+function Header({ cartCount, onOpenCart, onOpenWishlist, wishlistCount }) {
   return (
     <header className="sticky top-0 z-50 bg-white shadow-sm">
       <div className="bg-brand-dark px-4 py-2 text-center text-xs font-semibold uppercase tracking-wide text-white sm:text-sm">
@@ -83,16 +88,27 @@ function Header() {
             />
             <Search size={20} />
           </div>
-          <button className="rounded-full p-2 hover:bg-stone-100" aria-label="Wishlist">
+          <button
+            className="relative rounded-full p-2 hover:bg-stone-100"
+            onClick={onOpenWishlist}
+            aria-label="Open wishlist"
+          >
             <Heart size={22} />
+            <span className="absolute right-0 top-0 grid h-5 w-5 place-items-center rounded-full bg-brand-red text-xs font-bold text-white">
+              {wishlistCount}
+            </span>
           </button>
           <button className="rounded-full p-2 hover:bg-stone-100" aria-label="Account">
             <User size={22} />
           </button>
-          <button className="relative rounded-full p-2 hover:bg-stone-100" aria-label="Cart">
+          <button
+            className="relative rounded-full p-2 hover:bg-stone-100"
+            onClick={onOpenCart}
+            aria-label="Open cart"
+          >
             <ShoppingBag size={22} />
             <span className="absolute right-0 top-0 grid h-5 w-5 place-items-center rounded-full bg-brand-red text-xs font-bold text-white">
-              0
+              {cartCount}
             </span>
           </button>
         </div>
@@ -198,7 +214,12 @@ function StylePills() {
   );
 }
 
-function FeaturedProducts({ onSelectProduct }) {
+function FeaturedProducts({
+  isProductWishlisted,
+  onAddToCart,
+  onSelectProduct,
+  onToggleWishlist,
+}) {
   const featuredProducts = products.slice(0, 4);
 
   return (
@@ -210,8 +231,11 @@ function FeaturedProducts({ onSelectProduct }) {
       <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
         {featuredProducts.map((product) => (
           <ProductCard
+            isWishlisted={isProductWishlisted(product.id)}
             key={product.id}
             product={product}
+            onAddToCart={onAddToCart}
+            onToggleWishlist={onToggleWishlist}
             onViewProduct={onSelectProduct}
           />
         ))}
@@ -270,6 +294,32 @@ function Footer() {
 
 export default function App() {
   const [selectedProduct, setSelectedProduct] = React.useState(products[0]);
+  
+  const [cartItems, setCartItems] = React.useState(() => {
+    const saved = localStorage.getItem("cartItems");
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  const [isCartOpen, setIsCartOpen] = React.useState(false);
+  const [isCheckoutOpen, setIsCheckoutOpen] = React.useState(false);
+  const [isWishlistOpen, setIsWishlistOpen] = React.useState(false);
+  
+  const [wishlistItems, setWishlistItems] = React.useState(() => {
+    const saved = localStorage.getItem("wishlistItems");
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  const [orders, setOrders] = React.useState(() => {
+    const saved = localStorage.getItem("orders");
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0);
+  const wishlistCount = wishlistItems.length;
+
+  function isProductWishlisted(productId) {
+    return wishlistItems.some((product) => product.id === productId);
+  }
 
   function handleSelectProduct(product) {
     setSelectedProduct(product);
@@ -279,19 +329,148 @@ export default function App() {
     }, 50);
   }
 
+  function handleAddToCart(product) {
+    setCartItems((currentItems) => {
+      const existingItem = currentItems.find((item) => item.product.id === product.id);
+
+      if (existingItem) {
+        return currentItems.map((item) =>
+          item.product.id === product.id
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        );
+      }
+
+      return [...currentItems, { product, quantity: 1 }];
+    });
+    setIsCartOpen(true);
+  }
+
+  function handleToggleWishlist(product) {
+    setWishlistItems((currentItems) => {
+      const alreadySaved = currentItems.some((item) => item.id === product.id);
+
+      if (alreadySaved) {
+        return currentItems.filter((item) => item.id !== product.id);
+      }
+
+      return [...currentItems, product];
+    });
+  }
+
+  function handleIncreaseQuantity(productId) {
+    setCartItems((currentItems) =>
+      currentItems.map((item) =>
+        item.product.id === productId
+          ? { ...item, quantity: item.quantity + 1 }
+          : item
+      )
+    );
+  }
+
+  function handleDecreaseQuantity(productId) {
+    setCartItems((currentItems) =>
+      currentItems
+        .map((item) =>
+          item.product.id === productId
+            ? { ...item, quantity: item.quantity - 1 }
+            : item
+        )
+        .filter((item) => item.quantity > 0)
+    );
+  }
+
+  function handleRemoveItem(productId) {
+    setCartItems((currentItems) =>
+      currentItems.filter((item) => item.product.id !== productId)
+    );
+  }
+
+  function handleRemoveWishlistItem(productId) {
+    setWishlistItems((currentItems) =>
+      currentItems.filter((product) => product.id !== productId)
+    );
+  }
+
+  function handleOpenCheckout() {
+    setIsCartOpen(false);
+    setIsCheckoutOpen(true);
+  }
+
+  function handlePlaceOrder(order) {
+    setOrders((currentOrders) => [order, ...currentOrders]);
+    setCartItems([]);
+  }
+
+  useEffect(() => {
+    localStorage.setItem("cartItems", JSON.stringify(cartItems));
+  }, [cartItems]);
+
+  useEffect(() => {
+    localStorage.setItem("wishlistItems", JSON.stringify(wishlistItems));
+  }, [wishlistItems]);
+
+  useEffect(() => {
+    localStorage.setItem("orders", JSON.stringify(orders));
+  }, [orders]);
+
   return (
     <div className="min-h-screen bg-white font-body text-brand-ink">
-      <Header />
+      <Header
+        cartCount={cartCount}
+        onOpenCart={() => setIsCartOpen(true)}
+        onOpenWishlist={() => setIsWishlistOpen(true)}
+        wishlistCount={wishlistCount}
+      />
       <main>
         <Hero />
         <CategorySection />
         <StylePills />
-        <FeaturedProducts onSelectProduct={handleSelectProduct} />
-        <ProductDetail product={selectedProduct} onSelectProduct={handleSelectProduct} />
-        <ProductListing onSelectProduct={handleSelectProduct} />
+        <FeaturedProducts
+          isProductWishlisted={isProductWishlisted}
+          onAddToCart={handleAddToCart}
+          onSelectProduct={handleSelectProduct}
+          onToggleWishlist={handleToggleWishlist}
+        />
+        <ProductDetail
+          isProductWishlisted={isProductWishlisted}
+          product={selectedProduct}
+          onAddToCart={handleAddToCart}
+          onSelectProduct={handleSelectProduct}
+          onToggleWishlist={handleToggleWishlist}
+        />
+        <ProductListing
+          isProductWishlisted={isProductWishlisted}
+          onAddToCart={handleAddToCart}
+          onSelectProduct={handleSelectProduct}
+          onToggleWishlist={handleToggleWishlist}
+        />
         <TrustBand />
       </main>
       <Footer />
+      <CartDrawer
+        cartItems={cartItems}
+        isOpen={isCartOpen}
+        onClose={() => setIsCartOpen(false)}
+        onCheckout={handleOpenCheckout}
+        onIncreaseQuantity={handleIncreaseQuantity}
+        onDecreaseQuantity={handleDecreaseQuantity}
+        onRemoveItem={handleRemoveItem}
+      />
+      <CheckoutModal
+        cartItems={cartItems}
+        isOpen={isCheckoutOpen}
+        onClose={() => setIsCheckoutOpen(false)}
+        onPlaceOrder={handlePlaceOrder}
+      />
+      <WishlistDrawer
+        wishlistItems={wishlistItems}
+        isOpen={isWishlistOpen}
+        onAddToCart={handleAddToCart}
+        onClose={() => setIsWishlistOpen(false)}
+        onRemoveItem={handleRemoveWishlistItem}
+        onViewProduct={handleSelectProduct}
+      />
     </div>
   );
 }
