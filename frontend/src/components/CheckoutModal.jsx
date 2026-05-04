@@ -8,6 +8,7 @@ export default function CheckoutModal({
   onClose,
   onPlaceOrder,
 }) {
+  const [error, setError] = React.useState("");
   const [formData, setFormData] = React.useState({
     name: "",
     phone: "",
@@ -16,6 +17,7 @@ export default function CheckoutModal({
     paymentMethod: "card",
   });
   const [isOrderPlaced, setIsOrderPlaced] = React.useState(false);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [orderId, setOrderId] = React.useState("");
 
   const subtotal = cartItems.reduce(
@@ -33,20 +35,24 @@ export default function CheckoutModal({
     }));
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
+    setError("");
+    setIsSubmitting(true);
 
-    const newOrderId = `SS-${Date.now().toString().slice(-6)}`;
-    setOrderId(newOrderId);
-    setIsOrderPlaced(true);
-    onPlaceOrder({
-      id: newOrderId,
-      customer: formData,
-      items: cartItems,
-      placedAt: new Date().toISOString(),
-      total,
-      status: "Placed",
-    });
+    try {
+      const order = await onPlaceOrder({
+        customer: formData,
+        items: cartItems,
+        total,
+      });
+      setOrderId(order.id || `SS-${Date.now().toString().slice(-6)}`);
+      setIsOrderPlaced(true);
+    } catch (apiError) {
+      setError(apiError.message);
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   function handleClose() {
@@ -204,10 +210,12 @@ export default function CheckoutModal({
 
               <button
                 className="mt-5 w-full rounded-md bg-brand-red px-5 py-3 font-bold text-white transition hover:bg-red-800"
+                disabled={isSubmitting}
                 type="submit"
               >
-                Pay Rs. {total}
+                {isSubmitting ? "Placing order..." : `Pay Rs. ${total}`}
               </button>
+              {error && <p className="mt-3 rounded-md bg-red-50 p-3 text-sm font-semibold text-brand-red">{error}</p>}
             </aside>
           </form>
         )}

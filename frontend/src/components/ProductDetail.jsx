@@ -2,7 +2,6 @@ import React from "react";
 
 import { Heart, ShoppingBag, Star, Truck } from "lucide-react";
 import ProductCard from "./ProductCard";
-import { getRecommendedProducts } from "../services/productService";
 
 const colorClassNames = {
   Black: "bg-black",
@@ -14,8 +13,24 @@ const colorClassNames = {
   Wine: "bg-red-900",
 };
 
-export default function ProductDetail({ product, onSelectProduct }) {
-  const recommendedProducts = getRecommendedProducts(product);
+export default function ProductDetail({
+  isProductWishlisted,
+  onAddToCart,
+  onSelectProduct,
+  onToggleWishlist,
+  product,
+  products,
+}) {
+  const recommendedProducts = products
+    .filter((item) => item.id !== product.id)
+    .filter(
+      (item) =>
+        item.category === product.category ||
+        item.type === product.type ||
+        item.brand === product.brand
+    )
+    .slice(0, 3);
+  const isWishlisted = isProductWishlisted(product.id);
 
   return (
     <section id="product-detail" className="bg-stone-50 py-14">
@@ -97,13 +112,23 @@ export default function ProductDetail({ product, onSelectProduct }) {
             </div>
 
             <div className="mt-8 grid gap-3 sm:grid-cols-2">
-              <button className="flex items-center justify-center gap-2 rounded-md bg-brand-red px-5 py-3 font-bold text-white transition hover:bg-red-800">
+              <button
+                onClick={() => onAddToCart(product)}
+                className="flex items-center justify-center gap-2 rounded-md bg-brand-red px-5 py-3 font-bold text-white transition hover:bg-red-800"
+              >
                 Add to cart
                 <ShoppingBag size={20} />
               </button>
-              <button className="flex items-center justify-center gap-2 rounded-md border border-stone-300 px-5 py-3 font-bold text-brand-ink transition hover:border-brand-red hover:text-brand-red">
-                Wishlist
-                <Heart size={20} />
+              <button
+                onClick={() => onToggleWishlist(product)}
+                className={`flex items-center justify-center gap-2 rounded-md border px-5 py-3 font-bold transition ${
+                  isWishlisted
+                    ? "border-brand-red bg-red-50 text-brand-red"
+                    : "border-stone-300 text-brand-ink hover:border-brand-red hover:text-brand-red"
+                }`}
+              >
+                {isWishlisted ? "Wishlisted" : "Wishlist"}
+                <Heart size={20} fill={isWishlisted ? "currentColor" : "none"} />
               </button>
             </div>
 
@@ -132,8 +157,11 @@ export default function ProductDetail({ product, onSelectProduct }) {
             <div className="mt-6 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
               {recommendedProducts.map((recommendedProduct) => (
                 <ProductCard
+                  isWishlisted={isProductWishlisted(recommendedProduct.id)}
                   key={recommendedProduct.id}
                   product={recommendedProduct}
+                  onAddToCart={onAddToCart}
+                  onToggleWishlist={onToggleWishlist}
                   onViewProduct={onSelectProduct}
                 />
               ))}

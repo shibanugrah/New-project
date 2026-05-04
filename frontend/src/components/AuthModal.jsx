@@ -25,6 +25,8 @@ const modeCopy = {
 
 export default function AuthModal({ currentUser, isOpen, onClose, onLogin, onLogout }) {
   const [mode, setMode] = React.useState("login");
+  const [error, setError] = React.useState("");
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [formData, setFormData] = React.useState({
     name: "",
     email: "",
@@ -41,15 +43,25 @@ export default function AuthModal({ currentUser, isOpen, onClose, onLogin, onLog
     }));
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
+    setError("");
+    setIsSubmitting(true);
 
-    onLogin({
-      name: mode === "register" ? formData.name : mode === "admin" ? "Admin User" : "Demo User",
-      email: formData.email,
-      role: mode === "admin" ? "admin" : "user",
-    });
-    onClose();
+    try {
+      await onLogin({
+        mode,
+        name: mode === "register" ? formData.name : mode === "admin" ? "Admin User" : "Demo User",
+        email: formData.email,
+        password: formData.password,
+        role: mode === "admin" ? "admin" : "user",
+      });
+      onClose();
+    } catch (apiError) {
+      setError(apiError.message);
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   if (!isOpen) return null;
@@ -148,14 +160,15 @@ export default function AuthModal({ currentUser, isOpen, onClose, onLogin, onLog
 
             <button
               className="mt-5 w-full rounded-md bg-brand-red px-5 py-3 font-bold text-white transition hover:bg-red-800"
+              disabled={isSubmitting}
               type="submit"
             >
-              {modeCopy[mode].button}
+              {isSubmitting ? "Please wait..." : modeCopy[mode].button}
             </button>
 
-            <p className="mt-4 text-center text-sm text-stone-600">
-              This is frontend-only mock auth. JWT will be connected in the backend phase.
-            </p>
+            {error && <p className="mt-4 rounded-md bg-red-50 p-3 text-sm font-semibold text-brand-red">{error}</p>}
+
+            <p className="mt-4 text-center text-sm text-stone-600">Connected to JWT authentication API.</p>
           </form>
         )}
       </section>

@@ -26,6 +26,14 @@ const productSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    oldPrice: {
+      type: Number,
+      default: 0,
+    },
+    discount: {
+      type: Number,
+      default: 0,
+    },
     description: {
       type: String,
       required: true,
@@ -47,6 +55,19 @@ const productSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+productSchema.virtual("id").get(function () {
+  return this._id.toString();
+});
+
+productSchema.set("toJSON", {
+  virtuals: true,
+  versionKey: false,
+  transform: (doc, ret) => {
+    delete ret._id;
+    return ret;
+  },
+});
 
 const Product = mongoose.model("Product", productSchema);
 

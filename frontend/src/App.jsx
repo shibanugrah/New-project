@@ -2,6 +2,17 @@ import React from "react";
 import { useEffect } from "react";
 
 import { products } from "./data/products";
+import {
+  createOrderApi,
+  createProductApi,
+  deleteProductApi,
+  getAllOrdersApi,
+  getMyOrdersApi,
+  getProductsApi,
+  loginApi,
+  registerApi,
+  updateProductApi,
+} from "./services/api";
 import AdminDashboard from "./components/AdminDashboard";
 import ProductCard from "./components/ProductCard";
 import AuthModal from "./components/AuthModal";
@@ -453,39 +464,100 @@ export default function App() {
     setIsCheckoutOpen(true);
   }
 
-  function handlePlaceOrder(order) {
-    setOrders((currentOrders) => [order, ...currentOrders]);
+  async function handlePlaceOrder(order) {
+    if (!currentUser) {
+      throw new Error("Please login before placing an order.");
+    }
+
+    const savedOrder = await createOrderApi(order);
+    setOrders((currentOrders) => [savedOrder, ...currentOrders]);
     setCartItems([]);
+    return savedOrder;
   }
 
-  function handleLogin(user) {
-    setCurrentUser(user);
+  async function handleLogin(user) {
+    let loggedInUser;
+
+    if (user.mode === "register") {
+      loggedInUser = await registerApi(user);
+    } else if (user.mode === "admin") {
+      try {
+        loggedInUser = await loginApi(user);
+      } catch {
+        loggedInUser = await registerApi(user);
+      }
+    } else {
+      loggedInUser = await loginApi(user);
+    }
+
+    localStorage.setItem("token", loggedInUser.token);
+    setCurrentUser(loggedInUser);
   }
 
   function handleLogout() {
+    localStorage.removeItem("token");
     setCurrentUser(null);
+    setOrders([]);
   }
 
-  function handleCreateProduct(product) {
-    setProductItems((currentProducts) => [product, ...currentProducts]);
-    setSelectedProduct(product);
+  async function handleCreateProduct(product) {
+    try {
+      const createdProduct = await createProductApi(product);
+      setProductItems((currentProducts) => [createdProduct, ...currentProducts]);
+      setSelectedProduct(createdProduct);
+    } catch (error) {
+      alert(error.message);
+    }
   }
 
-  function handleUpdateProduct(updatedProduct) {
-    setProductItems((currentProducts) =>
-      currentProducts.map((product) =>
-        product.id === updatedProduct.id ? updatedProduct : product
-      )
-    );
-    setSelectedProduct(updatedProduct);
+  async function handleUpdateProduct(updatedProduct) {
+    try {
+      const savedProduct = await updateProductApi(updatedProduct);
+      setProductItems((currentProducts) =>
+        currentProducts.map((product) =>
+          product.id === savedProduct.id ? savedProduct : product
+        )
+      );
+      setSelectedProduct(savedProduct);
+    } catch (error) {
+      alert(error.message);
+    }
   }
 
-  function handleDeleteProduct(productId) {
-    setProductItems((currentProducts) => {
-      const nextProducts = currentProducts.filter((product) => product.id !== productId);
-      setSelectedProduct(nextProducts[0] || products[0]);
-      return nextProducts;
-    });
+  async function handleDeleteProduct(productId) {
+    try {
+      await deleteProductApi(productId);
+      setProductItems((currentProducts) => {
+        const nextProducts = currentProducts.filter((product) => product.id !== productId);
+        setSelectedProduct(nextProducts[0] || products[0]);
+        return nextProducts;
+      });
+    } catch (error) {
+      alert(error.message);
+    }
+  }
+
+  async function loadProductsFromApi() {
+    try {
+      const apiProducts = await getProductsApi();
+      if (apiProducts.length > 0) {
+        setProductItems(apiProducts);
+        setSelectedProduct(apiProducts[0]);
+      }
+    } catch (error) {
+      console.log(`Using frontend fallback products: ${error.message}`);
+    }
+  }
+
+  async function loadOrdersFromApi(user) {
+    if (!user) return;
+
+    try {
+      const apiOrders = user.role === "admin" ? await getAllOrdersApi() : await getMyOrdersApi();
+      setOrders(apiOrders);
+    } catch (error) {
+      console.log(`Could not load orders: ${error.message}`);
+    }
   }
 
   useEffect(() => {
@@ -503,14 +575,22 @@ export default function App() {
   useEffect(() => {
     if (currentUser) {
       localStorage.setItem("currentUser", JSON.stringify(currentUser));
+      if (currentUser.token) {
+        localStorage.setItem("token", currentUser.token);
+      }
     } else {
       localStorage.removeItem("currentUser");
+      localStorage.removeItem("token");
     }
   }, [currentUser]);
 
   useEffect(() => {
-    localStorage.setItem("productItems", JSON.stringify(productItems));
-  }, [productItems]);
+    loadProductsFromApi();
+  }, []);
+
+  useEffect(() => {
+    loadOrdersFromApi(currentUser);
+  }, [currentUser]);
 
   return (
     <div className="min-h-screen bg-white font-body text-brand-ink">

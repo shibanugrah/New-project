@@ -113,21 +113,25 @@ export default function OrderHistoryDrawer({ isOpen, onClose, orders }) {
                   </div>
 
                   <div className="mt-5 space-y-3">
-                    {order.items.map((item) => (
-                      <div key={item.product.id} className="flex gap-3 rounded-md bg-stone-50 p-3">
+                    {order.items.map((item) => {
+                      const product = item.product || item;
+
+                      return (
+                      <div key={product.id || product.productId || product.name} className="flex gap-3 rounded-md bg-stone-50 p-3">
                         <img
-                          src={item.product.image}
-                          alt={item.product.name}
+                          src={product.image}
+                          alt={product.name}
                           className="h-16 w-16 rounded-md object-cover"
                         />
                         <div className="min-w-0">
-                          <p className="font-bold leading-5">{item.product.name}</p>
+                          <p className="font-bold leading-5">{product.name}</p>
                           <p className="text-sm text-stone-500">
-                            Qty {item.quantity} x Rs. {item.product.price}
+                            Qty {item.quantity} x Rs. {product.price}
                           </p>
                         </div>
                       </div>
-                    ))}
+                    );
+                    })}
                   </div>
 
                   <div className="mt-6">
