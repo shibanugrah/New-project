@@ -117,7 +117,7 @@ export default function OrderHistoryDrawer({ isOpen, onClose, orders }) {
                       const product = item.product || item;
 
                       return (
-                      <div key={product.id || product.productId || product.name} className="flex gap-3 rounded-md bg-stone-50 p-3">
+                      <div key={product._id || product.productId || product.name} className="flex gap-3 rounded-md bg-stone-50 p-3">
                         <img
                           src={product.image}
                           alt={product.name}

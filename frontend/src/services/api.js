@@ -21,6 +21,12 @@ async function request(path, options = {}) {
   return data;
 }
 
+function getAuthHeader() {
+  const token = localStorage.getItem("token");
+
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
 export function getProductsApi() {
   return request("/products");
 }
@@ -33,8 +39,9 @@ export function createProductApi(product) {
 }
 
 export function updateProductApi(product) {
-  return request(`/products/${product.id}`, {
+  return request(`/products/${product._id}`, {
     method: "PUT",
+    headers: getAuthHeader(),
     body: JSON.stringify(product),
   });
 }
@@ -42,6 +49,7 @@ export function updateProductApi(product) {
 export function deleteProductApi(productId) {
   return request(`/products/${productId}`, {
     method: "DELETE",
+    headers: getAuthHeader(),
   });
 }
 

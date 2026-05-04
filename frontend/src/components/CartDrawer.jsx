@@ -71,7 +71,7 @@ export default function CartDrawer({
           <>
             <div className="flex-1 space-y-5 overflow-y-auto px-5 py-5">
               {cartItems.map((item) => (
-                <article key={item.product.id} className="flex gap-4 border-b border-stone-100 pb-5">
+                <article key={item.product._id} className="flex gap-4 border-b border-stone-100 pb-5">
                   <img
                     src={item.product.image}
                     alt={item.product.name}
@@ -88,7 +88,7 @@ export default function CartDrawer({
                       </div>
                       <button
                         className="rounded-full p-2 text-stone-500 hover:bg-stone-100 hover:text-brand-red"
-                        onClick={() => onRemoveItem(item.product.id)}
+                        onClick={() => onRemoveItem(item.product._id)}
                         aria-label={`Remove ${item.product.name}`}
                       >
                         <Trash2 size={18} />
@@ -99,7 +99,7 @@ export default function CartDrawer({
                       <div className="flex items-center rounded-md border border-stone-200">
                         <button
                           className="p-2 hover:bg-stone-100"
-                          onClick={() => onDecreaseQuantity(item.product.id)}
+                          onClick={() => onDecreaseQuantity(item.product._id)}
                           aria-label={`Decrease ${item.product.name} quantity`}
                         >
                           <Minus size={16} />
@@ -107,7 +107,7 @@ export default function CartDrawer({
                         <span className="w-10 text-center font-bold">{item.quantity}</span>
                         <button
                           className="p-2 hover:bg-stone-100"
-                          onClick={() => onIncreaseQuantity(item.product.id)}
+                          onClick={() => onIncreaseQuantity(item.product._id)}
                           aria-label={`Increase ${item.product.name} quantity`}
                         >
                           <Plus size={16} />

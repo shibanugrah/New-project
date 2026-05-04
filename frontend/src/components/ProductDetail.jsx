@@ -22,7 +22,7 @@ export default function ProductDetail({
   products,
 }) {
   const recommendedProducts = products
-    .filter((item) => item.id !== product.id)
+    .filter((item) => item._id !== product._id)
     .filter(
       (item) =>
         item.category === product.category ||
@@ -30,7 +30,7 @@ export default function ProductDetail({
         item.brand === product.brand
     )
     .slice(0, 3);
-  const isWishlisted = isProductWishlisted(product.id);
+  const isWishlisted = isProductWishlisted(product._id);
 
   return (
     <section id="product-detail" className="bg-stone-50 py-14">
@@ -157,8 +157,8 @@ export default function ProductDetail({
             <div className="mt-6 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
               {recommendedProducts.map((recommendedProduct) => (
                 <ProductCard
-                  isWishlisted={isProductWishlisted(recommendedProduct.id)}
-                  key={recommendedProduct.id}
+                  isWishlisted={isProductWishlisted(recommendedProduct._id)}
+                  key={recommendedProduct._id}
                   product={recommendedProduct}
                   onAddToCart={onAddToCart}
                   onToggleWishlist={onToggleWishlist}

@@ -285,8 +285,8 @@ function FeaturedProducts({
       <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
         {featuredProducts.map((product) => (
           <ProductCard
-            isWishlisted={isProductWishlisted(product.id)}
-            key={product.id}
+            isWishlisted={isProductWishlisted(product._id)}
+            key={product._id}
             product={product}
             onAddToCart={onAddToCart}
             onToggleWishlist={onToggleWishlist}
@@ -385,7 +385,7 @@ export default function App() {
   const wishlistCount = wishlistItems.length;
 
   function isProductWishlisted(productId) {
-    return wishlistItems.some((product) => product.id === productId);
+    return wishlistItems.some((product) => product._id === productId);
   }
 
   function handleSelectProduct(product) {
@@ -398,11 +398,11 @@ export default function App() {
 
   function handleAddToCart(product) {
     setCartItems((currentItems) => {
-      const existingItem = currentItems.find((item) => item.product.id === product.id);
+      const existingItem = currentItems.find((item) => item.product._id === product._id);
 
       if (existingItem) {
         return currentItems.map((item) =>
-          item.product.id === product.id
+          item.product._id === product._id
             ? { ...item, quantity: item.quantity + 1 }
             : item
         );
@@ -415,10 +415,10 @@ export default function App() {
 
   function handleToggleWishlist(product) {
     setWishlistItems((currentItems) => {
-      const alreadySaved = currentItems.some((item) => item.id === product.id);
+      const alreadySaved = currentItems.some((item) => item._id === product._id);
 
       if (alreadySaved) {
-        return currentItems.filter((item) => item.id !== product.id);
+        return currentItems.filter((item) => item._id !== product._id);
       }
 
       return [...currentItems, product];
@@ -428,7 +428,7 @@ export default function App() {
   function handleIncreaseQuantity(productId) {
     setCartItems((currentItems) =>
       currentItems.map((item) =>
-        item.product.id === productId
+        item.product._id === productId
           ? { ...item, quantity: item.quantity + 1 }
           : item
       )
@@ -439,7 +439,7 @@ export default function App() {
     setCartItems((currentItems) =>
       currentItems
         .map((item) =>
-          item.product.id === productId
+          item.product._id === productId
             ? { ...item, quantity: item.quantity - 1 }
             : item
         )
@@ -449,13 +449,13 @@ export default function App() {
 
   function handleRemoveItem(productId) {
     setCartItems((currentItems) =>
-      currentItems.filter((item) => item.product.id !== productId)
+      currentItems.filter((item) => item.product._id !== productId)
     );
   }
 
   function handleRemoveWishlistItem(productId) {
     setWishlistItems((currentItems) =>
-      currentItems.filter((product) => product.id !== productId)
+      currentItems.filter((product) => product._id !== productId)
     );
   }
 
@@ -515,7 +515,7 @@ export default function App() {
       const savedProduct = await updateProductApi(updatedProduct);
       setProductItems((currentProducts) =>
         currentProducts.map((product) =>
-          product.id === savedProduct.id ? savedProduct : product
+          product._id === savedProduct._id ? savedProduct : product
         )
       );
       setSelectedProduct(savedProduct);
@@ -528,7 +528,7 @@ export default function App() {
     try {
       await deleteProductApi(productId);
       setProductItems((currentProducts) => {
-        const nextProducts = currentProducts.filter((product) => product.id !== productId);
+        const nextProducts = currentProducts.filter((product) => product._id !== productId);
         setSelectedProduct(nextProducts[0] || products[0]);
         return nextProducts;
       });

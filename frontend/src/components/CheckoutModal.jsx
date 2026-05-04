@@ -177,7 +177,7 @@ export default function CheckoutModal({
               <h3 className="font-display text-xl font-black">Order summary</h3>
               <div className="mt-4 space-y-4">
                 {cartItems.map((item) => (
-                  <div key={item.product.id} className="flex gap-3">
+                  <div key={item.product._id} className="flex gap-3">
                     <img
                       src={item.product.image}
                       alt={item.product.name}

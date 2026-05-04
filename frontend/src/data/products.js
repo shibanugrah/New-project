@@ -1,6 +1,6 @@
 export const products = [
   {
-    id: 1,
+    _id: "seed-1",
     name: "AirFlex Casual Sneakers",
     brand: "Nike",
     category: "Men",
@@ -16,7 +16,7 @@ export const products = [
       "https://images.unsplash.com/photo-1608231387042-66d1773070a5?auto=format&fit=crop&w=700&q=80",
   },
   {
-    id: 2,
+    _id: "seed-2",
     name: "Urban Brown Loafers",
     brand: "Metro",
     category: "Men",
@@ -32,7 +32,7 @@ export const products = [
       "https://images.unsplash.com/photo-1614252235316-8c857d38b5f4?auto=format&fit=crop&w=700&q=80",
   },
   {
-    id: 3,
+    _id: "seed-3",
     name: "CloudStep Running Shoes",
     brand: "Puma",
     category: "Men",
@@ -48,7 +48,7 @@ export const products = [
       "https://images.unsplash.com/photo-1556906781-9a412961c28c?auto=format&fit=crop&w=700&q=80",
   },
   {
-    id: 4,
+    _id: "seed-4",
     name: "Comfort Strap Sandals",
     brand: "Shoe Shopper",
     category: "Women",
@@ -64,7 +64,7 @@ export const products = [
       "https://images.unsplash.com/photo-1603487742131-4160ec999306?auto=format&fit=crop&w=700&q=80",
   },
   {
-    id: 5,
+    _id: "seed-5",
     name: "Elegant Block Heels",
     brand: "Mochi",
     category: "Women",
@@ -80,7 +80,7 @@ export const products = [
       "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&w=700&q=80",
   },
   {
-    id: 6,
+    _id: "seed-6",
     name: "Junior Sprint Sneakers",
     brand: "Skechers",
     category: "Kids",
@@ -96,7 +96,7 @@ export const products = [
       "https://images.unsplash.com/photo-1514989940723-e8e51635b782?auto=format&fit=crop&w=700&q=80",
   },
   {
-    id: 7,
+    _id: "seed-7",
     name: "Classic Formal Oxfords",
     brand: "Davinci",
     category: "Men",
@@ -112,7 +112,7 @@ export const products = [
       "https://images.unsplash.com/photo-1614252369475-531eba835eb1?auto=format&fit=crop&w=700&q=80",
   },
   {
-    id: 8,
+    _id: "seed-8",
     name: "Everyday White Flats",
     brand: "Metro",
     category: "Women",

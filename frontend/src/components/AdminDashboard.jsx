@@ -16,10 +16,10 @@ const emptyProduct = {
   image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=700&q=80",
 };
 
-function normalizeProduct(formData, fallbackId) {
+function normalizeProduct(formData, productId) {
   return {
     ...formData,
-    id: fallbackId,
+    ...(productId ? { _id: productId } : {}),
     price: Number(formData.price),
     oldPrice: Number(formData.oldPrice),
     discount: Number(formData.discount),
@@ -70,8 +70,7 @@ export default function AdminDashboard({
 
   function handleSubmit(event) {
     event.preventDefault();
-    const nextId = editingProduct?.id || Date.now();
-    const productPayload = normalizeProduct(formData, nextId);
+    const productPayload = normalizeProduct(formData, editingProduct?._id);
 
     if (editingProduct) {
       onUpdateProduct(productPayload);
@@ -205,7 +204,7 @@ export default function AdminDashboard({
                   </thead>
                   <tbody>
                     {products.map((product) => (
-                      <tr key={product.id} className="border-b border-stone-100">
+                      <tr key={product._id} className="border-b border-stone-100">
                         <td className="px-3 py-3">
                           <div className="flex items-center gap-3">
                             <img src={product.image} alt={product.name} className="h-12 w-12 rounded-md object-cover" />
@@ -223,7 +222,7 @@ export default function AdminDashboard({
                             <button className="rounded-md bg-stone-100 p-2" onClick={() => startEditProduct(product)}>
                               <Edit3 size={16} />
                             </button>
-                            <button className="rounded-md bg-red-50 p-2 text-brand-red" onClick={() => onDeleteProduct(product.id)}>
+                            <button className="rounded-md bg-red-50 p-2 text-brand-red" onClick={() => onDeleteProduct(product._id)}>
                               <Trash2 size={16} />
                             </button>
                           </div>

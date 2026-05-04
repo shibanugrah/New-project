@@ -62,7 +62,7 @@ export default function WishlistDrawer({
         ) : (
           <div className="flex-1 space-y-5 overflow-y-auto px-5 py-5">
             {wishlistItems.map((product) => (
-              <article key={product.id} className="flex gap-4 border-b border-stone-100 pb-5">
+              <article key={product._id} className="flex gap-4 border-b border-stone-100 pb-5">
                 <button
                   onClick={() => {
                     onViewProduct(product);
@@ -89,7 +89,7 @@ export default function WishlistDrawer({
                     </div>
                     <button
                       className="rounded-full p-2 text-stone-500 hover:bg-stone-100 hover:text-brand-red"
-                      onClick={() => onRemoveItem(product.id)}
+                      onClick={() => onRemoveItem(product._id)}
                       aria-label={`Remove ${product.name} from wishlist`}
                     >
                       <Trash2 size={18} />

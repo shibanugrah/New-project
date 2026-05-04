@@ -58,8 +58,8 @@ export default function SearchOverlay({
             <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
               {matchingProducts.map((product) => (
                 <ProductCard
-                  isWishlisted={isProductWishlisted(product.id)}
-                  key={product.id}
+                  isWishlisted={isProductWishlisted(product._id)}
+                  key={product._id}
                   product={product}
                   onAddToCart={onAddToCart}
                   onToggleWishlist={onToggleWishlist}

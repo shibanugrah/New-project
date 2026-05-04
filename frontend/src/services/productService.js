@@ -5,14 +5,14 @@ export function getProducts() {
 }
 
 export function getProductById(productId) {
-  return products.find((product) => product.id === Number(productId));
+  return products.find((product) => product._id === productId);
 }
 
 export function getRecommendedProducts(currentProduct, limit = 3) {
   if (!currentProduct) return [];
 
   return products
-    .filter((product) => product.id !== currentProduct.id)
+    .filter((product) => product._id !== currentProduct._id)
     .filter(
       (product) =>
         product.category === currentProduct.category ||

@@ -66,7 +66,7 @@ export default function ProductListing({
       if (sortBy === "low") return a.price - b.price;
       if (sortBy === "high") return b.price - a.price;
       if (sortBy === "discount") return b.discount - a.discount;
-      return a.id - b.id;
+      return String(a._id).localeCompare(String(b._id));
     });
   }, [selectedBrand, selectedCategory, selectedTypes, sortBy]);
 
@@ -182,8 +182,8 @@ export default function ProductListing({
               <div className="grid gap-x-8 gap-y-10 sm:grid-cols-2 xl:grid-cols-3">
                 {visibleProducts.map((product) => (
                   <ProductCard
-                    isWishlisted={isProductWishlisted(product.id)}
-                    key={product.id}
+                    isWishlisted={isProductWishlisted(product._id)}
+                    key={product._id}
                     product={product}
                     onAddToCart={onAddToCart}
                     onToggleWishlist={onToggleWishlist}
