@@ -1,12 +1,13 @@
 import React from "react";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Filter, SlidersHorizontal } from "lucide-react";
 import ProductCard from "./ProductCard";
 import { brands, categories, shoeTypes } from "../data/products";
 
 const sortOptions = [
   { label: "Popularity", value: "popular" },
+  { label: "Newest", value: "newest" },
   { label: "Price: Low to High", value: "low" },
   { label: "Price: High to Low", value: "high" },
   { label: "Best Discount", value: "discount" },
@@ -42,6 +43,7 @@ function CheckFilter({ label, checked, onChange }) {
 }
 
 export default function ProductListing({
+  browseRequest,
   isProductWishlisted,
   onAddToCart,
   onSelectProduct,
@@ -51,24 +53,67 @@ export default function ProductListing({
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedBrand, setSelectedBrand] = useState("All");
   const [selectedTypes, setSelectedTypes] = useState([]);
+  const [saleOnly, setSaleOnly] = useState(false);
   const [sortBy, setSortBy] = useState("popular");
+
+  useEffect(() => {
+    if (!browseRequest) return;
+
+    if (browseRequest.type === "category") {
+      setSelectedCategory(browseRequest.value);
+      setSelectedBrand("All");
+      setSelectedTypes([]);
+      setSaleOnly(false);
+      setSortBy("popular");
+    }
+
+    if (browseRequest.type === "brands") {
+      setSelectedCategory("All");
+      setSelectedBrand("All");
+      setSelectedTypes([]);
+      setSaleOnly(false);
+      setSortBy("popular");
+    }
+
+    if (browseRequest.type === "sale") {
+      setSelectedCategory("All");
+      setSelectedBrand("All");
+      setSelectedTypes([]);
+      setSaleOnly(true);
+      setSortBy("discount");
+    }
+
+    if (browseRequest.type === "new") {
+      setSelectedCategory("All");
+      setSelectedBrand("All");
+      setSelectedTypes([]);
+      setSaleOnly(false);
+      setSortBy("newest");
+    }
+  }, [browseRequest]);
 
   const visibleProducts = useMemo(() => {
     const filtered = products.filter((product) => {
       const categoryMatch = selectedCategory === "All" || product.category === selectedCategory;
       const brandMatch = selectedBrand === "All" || product.brand === selectedBrand;
       const typeMatch = selectedTypes.length === 0 || selectedTypes.includes(product.type);
+      const saleMatch = !saleOnly || Number(product.discount) > 0;
 
-      return categoryMatch && brandMatch && typeMatch;
+      return categoryMatch && brandMatch && typeMatch && saleMatch;
     });
 
     return [...filtered].sort((a, b) => {
       if (sortBy === "low") return a.price - b.price;
       if (sortBy === "high") return b.price - a.price;
       if (sortBy === "discount") return b.discount - a.discount;
+      if (sortBy === "newest") {
+        const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return dateB - dateA || String(b._id).localeCompare(String(a._id));
+      }
       return String(a._id).localeCompare(String(b._id));
     });
-  }, [selectedBrand, selectedCategory, selectedTypes, sortBy]);
+  }, [products, saleOnly, selectedBrand, selectedCategory, selectedTypes, sortBy]);
 
   function toggleType(type) {
     setSelectedTypes((currentTypes) =>
@@ -91,7 +136,7 @@ export default function ProductListing({
               Browse footwear products
             </h2>
             <p className="mt-2 text-stone-600">
-              Sample JSON data today, MongoDB products API later.
+              Explore products by category, brand, discount and newest arrivals.
             </p>
           </div>
 
@@ -120,6 +165,14 @@ export default function ProductListing({
               onClick={() => setSelectedCategory(category)}
             />
           ))}
+          <FilterButton
+            label="Sale"
+            active={saleOnly}
+            onClick={() => {
+              setSaleOnly((currentValue) => !currentValue);
+              setSortBy("discount");
+            }}
+          />
         </div>
 
         <div className="grid gap-8 lg:grid-cols-[260px_1fr]">
@@ -170,6 +223,7 @@ export default function ProductListing({
                   setSelectedCategory("All");
                   setSelectedBrand("All");
                   setSelectedTypes([]);
+                  setSaleOnly(false);
                   setSortBy("popular");
                 }}
                 className="text-sm font-bold text-brand-red"

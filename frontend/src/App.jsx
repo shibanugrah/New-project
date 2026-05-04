@@ -38,7 +38,14 @@ import {
   Sparkles,
 } from "lucide-react";
 
-const navItems = ["Men", "Women", "Kids", "Brands", "Sale", "New"];
+const navItems = [
+  { label: "Men", type: "category", value: "Men" },
+  { label: "Women", type: "category", value: "Women" },
+  { label: "Kids", type: "category", value: "Kids" },
+  { label: "Brands", type: "brands" },
+  { label: "Sale", type: "sale" },
+  { label: "New", type: "new" },
+];
 
 const categories = [
   {
@@ -81,9 +88,17 @@ function Header({
   onOpenProfile,
   onOpenSearch,
   onOpenWishlist,
+  onShopNavigate,
   orderCount,
   wishlistCount,
 }) {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
+
+  function handleShopNavigate(item) {
+    onShopNavigate(item);
+    setIsMobileMenuOpen(false);
+  }
+
   return (
     <header className="sticky top-0 z-50 bg-white shadow-sm">
       <div className="bg-brand-dark px-4 py-2 text-center text-xs font-semibold uppercase tracking-wide text-white sm:text-sm">
@@ -92,19 +107,33 @@ function Header({
 
       <nav className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 lg:px-8">
         <div className="flex items-center gap-3">
-          <button className="rounded-full p-2 text-brand-ink hover:bg-stone-100 lg:hidden" aria-label="Open menu">
+          <button
+            className="rounded-full p-2 text-brand-ink hover:bg-stone-100 lg:hidden"
+            onClick={() => setIsMobileMenuOpen((currentValue) => !currentValue)}
+            aria-label="Open menu"
+            type="button"
+          >
             <Menu size={24} />
           </button>
-          <a href="#" className="font-display text-2xl font-black uppercase tracking-[0.22em] text-brand-red">
+          <button
+            className="font-display text-2xl font-black uppercase tracking-[0.22em] text-brand-red"
+            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            type="button"
+          >
             Shoe Shopper
-          </a>
+          </button>
         </div>
 
         <div className="hidden items-center gap-8 font-semibold uppercase text-brand-ink lg:flex">
           {navItems.map((item) => (
-            <a key={item} href="#" className="text-sm transition hover:text-brand-red">
-              {item}
-            </a>
+            <button
+              key={item.label}
+              className="text-sm uppercase transition hover:text-brand-red"
+              onClick={() => handleShopNavigate(item)}
+              type="button"
+            >
+              {item.label}
+            </button>
           ))}
         </div>
 
@@ -168,6 +197,23 @@ function Header({
           </button>
         </div>
       </nav>
+
+      {isMobileMenuOpen && (
+        <div className="border-t border-stone-200 bg-white px-4 py-3 lg:hidden">
+          <div className="mx-auto grid max-w-7xl grid-cols-2 gap-2">
+            {navItems.map((item) => (
+              <button
+                key={item.label}
+                className="rounded-md bg-stone-50 px-4 py-3 text-left text-sm font-bold uppercase text-brand-ink hover:bg-red-50 hover:text-brand-red"
+                onClick={() => handleShopNavigate(item)}
+                type="button"
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
     </header>
   );
 }
@@ -372,6 +418,7 @@ export default function App() {
   const [isProfileOpen, setIsProfileOpen] = React.useState(false);
   const [isWishlistOpen, setIsWishlistOpen] = React.useState(false);
   const [isSearchOpen, setIsSearchOpen] = React.useState(false);
+  const [browseRequest, setBrowseRequest] = React.useState(null);
   
   const [wishlistItems, setWishlistItems] = React.useState(() => {
     const saved = localStorage.getItem("wishlistItems");
@@ -397,6 +444,20 @@ export default function App() {
     setTimeout(() => {
       document.getElementById("product-detail")?.scrollIntoView({ behavior: "smooth" });
     }, 50);
+  }
+
+  function scrollToProducts() {
+    setTimeout(() => {
+      document.getElementById("products")?.scrollIntoView({ behavior: "smooth" });
+    }, 50);
+  }
+
+  function handleShopNavigate(item) {
+    setBrowseRequest({
+      ...item,
+      requestId: Date.now(),
+    });
+    scrollToProducts();
   }
 
   function handleAddToCart(product) {
@@ -620,6 +681,7 @@ export default function App() {
         onOpenProfile={() => setIsProfileOpen(true)}
         onOpenSearch={() => setIsSearchOpen(true)}
         onOpenWishlist={() => setIsWishlistOpen(true)}
+        onShopNavigate={handleShopNavigate}
         orderCount={orderCount}
         wishlistCount={wishlistCount}
       />
@@ -643,6 +705,7 @@ export default function App() {
           products={productItems}
         />
         <ProductListing
+          browseRequest={browseRequest}
           isProductWishlisted={isProductWishlisted}
           onAddToCart={handleAddToCart}
           onSelectProduct={handleSelectProduct}
