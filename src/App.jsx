@@ -1,5 +1,8 @@
 import React from "react";
 import { products } from "./data/products";
+import ProductCard from "./components/ProductCard";
+import ProductDetail from "./components/ProductDetail";
+import ProductListing from "./components/ProductListing";
 
 import {
   Heart,
@@ -195,35 +198,9 @@ function StylePills() {
   );
 }
 
-function ProductCard({ product }) {
-  return (
-    <article className="group bg-white">
-      <div className="relative overflow-hidden rounded-lg bg-brand-soft">
-        <span className="absolute left-0 top-0 z-10 bg-brand-red px-3 py-1 text-sm font-bold text-white">
-          {product.tag}
-        </span>
-        <button className="absolute right-3 top-3 z-10 rounded-full bg-white p-2 shadow-sm" aria-label="Add to wishlist">
-          <Heart size={20} />
-        </button>
-        <img
-          className="aspect-[4/3] w-full object-cover transition duration-500 group-hover:scale-105"
-          src={product.image}
-          alt={product.name}
-        />
-      </div>
-      <div className="pt-4">
-        <p className="text-sm font-semibold text-stone-500">{product.brand}</p>
-        <h3 className="mt-1 min-h-12 text-lg font-bold leading-6 text-brand-ink">{product.name}</h3>
-        <div className="mt-2 flex items-center gap-2">
-          <span className="font-black text-brand-dark">Rs. {product.price}</span>
-          <span className="text-sm text-stone-400 line-through">Rs. {product.oldPrice}</span>
-        </div>
-      </div>
-    </article>
-  );
-}
+function FeaturedProducts({ onSelectProduct }) {
+  const featuredProducts = products.slice(0, 4);
 
-function FeaturedProducts() {
   return (
     <section id="featured" className="mx-auto max-w-7xl px-4 py-14 lg:px-8">
       <div className="mb-8 text-center">
@@ -231,8 +208,12 @@ function FeaturedProducts() {
         <h2 className="mt-2 font-display text-3xl font-black text-brand-ink">Fresh drops for every day</h2>
       </div>
       <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-        {products.map((product) => (
-          <ProductCard key={product.name} product={product} />
+        {featuredProducts.map((product) => (
+          <ProductCard
+            key={product.id}
+            product={product}
+            onViewProduct={onSelectProduct}
+          />
         ))}
       </div>
     </section>
@@ -288,6 +269,16 @@ function Footer() {
 }
 
 export default function App() {
+  const [selectedProduct, setSelectedProduct] = React.useState(products[0]);
+
+  function handleSelectProduct(product) {
+    setSelectedProduct(product);
+
+    setTimeout(() => {
+      document.getElementById("product-detail")?.scrollIntoView({ behavior: "smooth" });
+    }, 50);
+  }
+
   return (
     <div className="min-h-screen bg-white font-body text-brand-ink">
       <Header />
@@ -295,7 +286,9 @@ export default function App() {
         <Hero />
         <CategorySection />
         <StylePills />
-        <FeaturedProducts />
+        <FeaturedProducts onSelectProduct={handleSelectProduct} />
+        <ProductDetail product={selectedProduct} onSelectProduct={handleSelectProduct} />
+        <ProductListing onSelectProduct={handleSelectProduct} />
         <TrustBand />
       </main>
       <Footer />
