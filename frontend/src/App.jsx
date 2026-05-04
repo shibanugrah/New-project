@@ -19,6 +19,7 @@ import AuthModal from "./components/AuthModal";
 import CartDrawer from "./components/CartDrawer";
 import CheckoutModal from "./components/CheckoutModal";
 import OrderHistoryDrawer from "./components/OrderHistoryDrawer";
+import Profile from "./components/Profile";
 import ProductDetail from "./components/ProductDetail";
 import ProductListing from "./components/ProductListing";
 import SearchOverlay from "./components/SearchOverlay";
@@ -77,6 +78,7 @@ function Header({
   onOpenAuth,
   onOpenCart,
   onOpenOrders,
+  onOpenProfile,
   onOpenSearch,
   onOpenWishlist,
   orderCount,
@@ -149,7 +151,7 @@ function Header({
             className={`rounded-full p-2 hover:bg-stone-100 ${
               currentUser ? "text-brand-red" : "text-brand-ink"
             }`}
-            onClick={onOpenAuth}
+            onClick={currentUser ? onOpenProfile : onOpenAuth}
             aria-label="Open account login"
           >
             <User size={22} />
@@ -367,6 +369,7 @@ export default function App() {
   const [isAdminOpen, setIsAdminOpen] = React.useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = React.useState(false);
   const [isOrderHistoryOpen, setIsOrderHistoryOpen] = React.useState(false);
+  const [isProfileOpen, setIsProfileOpen] = React.useState(false);
   const [isWishlistOpen, setIsWishlistOpen] = React.useState(false);
   const [isSearchOpen, setIsSearchOpen] = React.useState(false);
   
@@ -498,6 +501,14 @@ export default function App() {
     localStorage.removeItem("token");
     setCurrentUser(null);
     setOrders([]);
+    setIsProfileOpen(false);
+  }
+
+  function handleProfileUpdate(updatedProfile) {
+    setCurrentUser((currentData) => ({
+      ...currentData,
+      ...updatedProfile,
+    }));
   }
 
   async function handleCreateProduct(product) {
@@ -505,8 +516,10 @@ export default function App() {
       const createdProduct = await createProductApi(product);
       setProductItems((currentProducts) => [createdProduct, ...currentProducts]);
       setSelectedProduct(createdProduct);
+      return createdProduct;
     } catch (error) {
       alert(error.message);
+      throw error;
     }
   }
 
@@ -519,8 +532,10 @@ export default function App() {
         )
       );
       setSelectedProduct(savedProduct);
+      return savedProduct;
     } catch (error) {
       alert(error.message);
+      throw error;
     }
   }
 
@@ -534,6 +549,7 @@ export default function App() {
       });
     } catch (error) {
       alert(error.message);
+      throw error;
     }
   }
 
@@ -601,6 +617,7 @@ export default function App() {
         onOpenAuth={() => setIsAuthOpen(true)}
         onOpenCart={() => setIsCartOpen(true)}
         onOpenOrders={() => setIsOrderHistoryOpen(true)}
+        onOpenProfile={() => setIsProfileOpen(true)}
         onOpenSearch={() => setIsSearchOpen(true)}
         onOpenWishlist={() => setIsWishlistOpen(true)}
         orderCount={orderCount}
@@ -650,6 +667,12 @@ export default function App() {
         onUpdateProduct={handleUpdateProduct}
         orders={orders}
         products={productItems}
+      />
+      <Profile
+        currentUser={currentUser}
+        isOpen={isProfileOpen}
+        onClose={() => setIsProfileOpen(false)}
+        onProfileUpdate={handleProfileUpdate}
       />
       <CartDrawer
         cartItems={cartItems}

@@ -68,14 +68,14 @@ export default function AdminDashboard({
     }));
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
     const productPayload = normalizeProduct(formData, editingProduct?._id);
 
     if (editingProduct) {
-      onUpdateProduct(productPayload);
+      await onUpdateProduct(productPayload);
     } else {
-      onCreateProduct(productPayload);
+      await onCreateProduct(productPayload);
     }
 
     startAddProduct();

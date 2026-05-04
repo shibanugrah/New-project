@@ -4,12 +4,12 @@ async function request(path, options = {}) {
   const token = localStorage.getItem("token");
 
   const response = await fetch(`${API_BASE_URL}${path}`, {
+    ...options,
     headers: {
       "Content-Type": "application/json",
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...options.headers,
     },
-    ...options,
   });
 
   const data = await response.json().catch(() => ({}));
@@ -21,6 +21,14 @@ async function request(path, options = {}) {
   return data;
 }
 
+function normalizeProduct(product) {
+  return product ? { ...product, _id: product._id || product.id } : product;
+}
+
+function normalizeProducts(products) {
+  return Array.isArray(products) ? products.map(normalizeProduct) : products;
+}
+
 function getAuthHeader() {
   const token = localStorage.getItem("token");
 
@@ -28,14 +36,15 @@ function getAuthHeader() {
 }
 
 export function getProductsApi() {
-  return request("/products");
+  return request("/products").then(normalizeProducts);
 }
 
 export function createProductApi(product) {
   return request("/products", {
     method: "POST",
+    headers: getAuthHeader(),
     body: JSON.stringify(product),
-  });
+  }).then(normalizeProduct);
 }
 
 export function updateProductApi(product) {
@@ -43,7 +52,7 @@ export function updateProductApi(product) {
     method: "PUT",
     headers: getAuthHeader(),
     body: JSON.stringify(product),
-  });
+  }).then(normalizeProduct);
 }
 
 export function deleteProductApi(productId) {
@@ -80,4 +89,16 @@ export function getMyOrdersApi() {
 
 export function getAllOrdersApi() {
   return request("/orders");
+}
+
+export function getProfileApi() {
+  return request("/users/profile");
+}
+
+export function updateProfileApi(profileData) {
+  return request("/users/profile", {
+    method: "PUT",
+    headers: getAuthHeader(),
+    body: JSON.stringify(profileData),
+  });
 }
